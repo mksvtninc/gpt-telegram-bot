@@ -1,14 +1,17 @@
 require('dotenv').config();
 const { Telegraf } = require('telegraf');
 const axios = require('axios');
+const express = require('express');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const openaiApiKey = process.env.OPENAI_API_KEY;
 
+// Старт
 bot.start((ctx) => {
   ctx.reply('Привет, это AI managed 🤖\n\nНапиши:\n\nНиша: ...\nЦА: ...\nПредложение: ...\n\nЯ сгенерирую 2 оффера.');
 });
 
+// Основная логика
 bot.on('text', async (ctx) => {
   const input = ctx.message.text;
 
@@ -52,5 +55,22 @@ ${input}
   }
 });
 
+// Запуск бота
 bot.launch();
 console.log('🤖 AI managed bot запущен');
+
+// Express-сервер для Render / Railway
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+  res.send('AI managed бот работает ✅');
+});
+
+app.listen(PORT, () => {
+  console.log(`🌐 Сервер слушает порт ${PORT}`);
+});
+
+// Обработка завершения
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
